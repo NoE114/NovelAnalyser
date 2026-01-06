@@ -3,91 +3,160 @@
 This layout enforces orthogonal lanes that integrate cleanly. Each Player owns a directory with clear deliverables. The orchestrator ties them together under Player 1’s authority.
 
 ```text
-novel-retrieval-system/
-├─ README.md                               # quick start, constraints, lane ownership
-├─ pyproject.toml                          # package + tooling config (prefer Poetry or PDM)
-├─ requirements.txt                        # pinned deps (Pathway, embeddings, LLM SDK)
-├─ .pre-commit-config.yaml                 # lint/format/type checks for determinism
-├─ .env.example                            # environment variables template
-├─ Makefile                                # reproducible targets (setup, index, query, evaluate)
+NovelAnalyzer/
+├─ README.md
+│   # Raj — System Lead
+│   # Project rules, how to run, what is in/out of scope
 
-├─ configs/                                # single source of truth for knobs (no hardcoding)
-│  ├─ system_rules.yaml                    # Player 1: chunking + retrieval + reasoning rules
-│  ├─ pathway.yaml                         # Player 2: ingestion paths, schema, index params
-│  ├─ retrieval.yaml                       # Player 3: top-k, chapter diversity, tie-breakers
-│  └─ models.yaml                          # Player 4: model choices, temperature, limits
+├─ pyproject.toml
+├─ requirements.txt
+├─ .env
+├─ .pre-commit-config.yaml
+├─ Makefile
+│   # Raj — enforcement + reproducibility
 
-├─ docs/                                   # judge-facing explanations and artifacts
-│  ├─ system_overview.md                   # Player 1: architecture + justification
-│  ├─ judges_explanation.md                # Player 1: final narrative + evidence of rigor
-│  └─ system_diagram.png                   # Player 1: diagram (data spine → retrieval → LLM)
-
-├─ data/                                   # deterministic, versioned data areas (no ad-hoc writes)
-│  ├─ raw/                                 # input novels (text + metadata CSV/JSON)
-│  ├─ processed/                           # Player 3: 400–600 word chunks w/ chapter + paragraph
-│  ├─ index/                               # Player 2: Pathway-managed vector indexes
-│  └─ samples/                             # small fixtures for CI tests and demos
-
-├─ src/                                    # production code, orthogonal lanes
-│  ├─ orchestration/                       # Player 1: integrates lanes, enforces rules
-│  │  ├─ integrate.py                      # end-to-end pipeline runner (strict sequence 1→5)
-│  │  └─ policies.py                       # guardrails: allowed LLM actions vs Python checks
+├─ configs/
+│  ├─ system_rules.yaml
+│  │   # Raj — GLOBAL AUTHORITY
+│  │   # Chunking rules, retrieval rules, reasoning + validation constraints
 │  │
-│  ├─ pathway_pipeline/                    # Player 2: data spine + index inside Pathway
-│  │  ├─ ingestion.py                      # load novels + metadata into Pathway
-│  │  ├─ schema.py                         # typed records: chapter, para_idx, text, ids
-│  │  ├─ vector_index.py                   # Pathway embeddings + index build/search
-│  │  └─ determinism.py                    # reproducibility hooks (seeds, hashes, manifests)
+│  ├─ pathway.yaml
+│  │   # Dipendu — Pathway configuration
+│  │   # Tables, connectors, index params, snapshot settings
 │  │
-│  ├─ chunking_retrieval/                  # Player 3: long-context chunking + retrieval logic
-│  │  ├─ chunker.py                        # 400–600 word chunks, preserve boundaries/context
-│  │  ├─ boundaries.py                     # paragraph/chapter boundary handling + fallbacks
-│  │  ├─ retrieval.py                      # top-k, chapter diversity enforcement, ranking
-│  │  └─ evidence_grouping.py              # grouped evidence sets (not just top similarity)
+│  ├─ retrieval.yaml
+│  │   # Sarvan — retrieval knobs
+│  │   # top-k, diversity rules, fallback behavior
 │  │
-│  ├─ reasoning_validation/                # Player 4: LLM prompts + Python validators
+│  └─ models.yaml
+│      # Gopal — model usage rules
+│      # embedding model, LLM provider, temps, rate limits
+
+├─ docs/
+│  ├─ system_overview.md
+│  │   # Raj — technical explanation for judges
+│  │
+│  ├─ judges_explanation.md
+│  │   # Raj — narrative explanation (non-technical)
+│  │
+│  └─ system_diagram.png
+│      # Raj — visual pipeline (Pathway → retrieval → reasoning)
+
+├─ data/
+│  ├─ raw/
+│  │   # Dipendu — input novels + metadata (read-only)
+│  │
+│  ├─ processed/
+│  │   # Sarvan — optional debug chunks (not authoritative)
+│  │
+│  ├─ index/
+│  │   # Dipendu — Pathway snapshot / restore state
+│  │
+│  └─ samples/
+│      # Raj — small fixtures for demos/tests
+
+├─ schemas/
+│  └─ answer.schema.json
+│      # Raj — STRICT output contract
+│      # Classification, quotes, alternatives, confidence
+
+├─ src/
+│  ├─ orchestration/
+│  │  ├─ integrate.py
+│  │  │   # Raj — single entrypoint
+│  │  │   # Starts Pathway app, enforces execution order
+│  │  │
+│  │  └─ policies.py
+│  │      # Raj — reads system_rules.yaml
+│  │      # Guards what LLM + pipeline are allowed to do
+│  │
+│  ├─ pathway_app/
+│  │  ├─ app.py
+│  │  │   # Dipendu — CORE Pathway program
+│  │  │   # Wires ingestion → chunking → index → retrieval → reasoning
+│  │  │
+│  │  ├─ schema.py
+│  │  │   # Dipendu — Pathway table schemas
+│  │  │
+│  │  ├─ chunking.py
+│  │  │   # Sarvan — chunking + boundary logic (400–600 words)
+│  │  │
+│  │  ├─ index.py
+│  │  │   # Dipendu — embeddings + vector index/search in Pathway
+│  │  │
+│  │  ├─ retrieval.py
+│  │  │   # Sarvan — ranking + diversity enforcement
+│  │  │
+│  │  ├─ reasoner.py
+│  │  │   # Gopal — LLM calls (schema-bound, no free-form)
+│  │  │
+│  │  ├─ validation.py
+│  │  │   # Gopal — Python veto logic
+│  │  │   # min evidence, contradictions, schema enforcement
+│  │  │
+│  │  ├─ service.py
+│  │  │   # Dipendu — optional HTTP ingress/egress
+│  │  │
 │  │  ├─ prompts/
-│  │  │  ├─ base_prompt.md                 # strict reasoning template: quotes, alts, confidence
-│  │  │  └─ verification_prompt.md         # optional sequential verification / cross-check
-│  │  ├─ reasoner.py                       # call LLM(s), produce constrained JSON
-│  │  ├─ validation.py                     # Python checks: min evidence, contradictions, rejects
-│  │  └─ outputs.py                        # JSON schema + serialization utilities
+│  │  │  ├─ base_prompt.md
+│  │  │  │   # Gopal — primary reasoning prompt
+│  │  │  │
+│  │  │  └─ verification_prompt.md
+│  │  │      # Gopal — optional cross-check prompt
+│  │  │
+│  │  └─ README.md
+│  │      # Raj — explains Pathway dataflow in plain language
 │  │
-│  └─ utils/                               # shared utilities (thin; no lane leakage)
-│     ├─ logging.py                        # structured logs for pipeline + retrieval + LLM
-│     ├─ io.py                             # file manifests, content hashing, safe writes
-│     └─ types.py                          # dataclasses/pydantic models for strong typing
+│  └─ utils/
+│     ├─ logging.py
+│     │   # Raj — structured logs
+│     │
+│     ├─ io.py
+│     │   # Dipendu — safe reads/writes, hashing
+│     │
+│     └─ types.py
+│         # Raj — shared dataclasses / typing
 
-├─ schemas/                                # explicit contracts for I/O and LLM outputs
-│  └─ answer.schema.json                   # Player 4: output schema (quotes, alts, confidence)
+├─ scripts/
+│  ├─ build_index.py
+│  │   # Dipendu — batch mode (delegates to Pathway app)
+│  │
+│  ├─ query.py
+│  │   # Gopal — run queries (batch or service)
+│  │
+│  └─ evaluate.py
+│      # Raj — lightweight sanity evaluation
 
-├─ scripts/                                # CLI entrypoints (deterministic order; no notebooks)
-│  ├─ build_index.py                       # 2: ingest → chunk (optional pre) → index build
-│  ├─ query.py                             # 3→4: retrieve evidence → reason → validate → JSON
-│  └─ evaluate.py                          # reproducible eval over samples; exports metrics
+└─ tests/
+   ├─ test_pipeline.py
+   │   # Dipendu — ingestion + schema invariants
+   │
+   ├─ test_chunking.py
+   │   # Sarvan — chunk size + boundary preservation
+   │
+   ├─ test_retrieval.py
+   │   # Sarvan — diversity + ranking stability
+   │
+   └─ test_validation.py
+       # Gopal — rejects weak or invalid outputs
 
-└─ tests/                                  # CI tests aligned to failure conditions
-   ├─ test_pipeline.py                     # Player 2: ingestion correctness, schema fidelity
-   ├─ test_chunking.py                     # Player 3: boundaries preserved, target lengths
-   ├─ test_retrieval.py                    # diversity enforced, stable top-k, ranking sanity
-   └─ test_validation.py                   # Player 4: rejects weak answers, contradiction flags
 ```
 
 ## Ownership and Deliverables
 
-- Player 1 — System Lead
+- Raj — System Lead
   - `configs/system_rules.yaml`, `src/orchestration/`, `docs/*`
   - Deliverables: rules, final explanation, system diagram, integration script.
 
-- Player 2 — Pathway + Data Pipeline
+- Dipendu — Pathway + Data Pipeline
   - `src/pathway_pipeline/`, `configs/pathway.yaml`, `data/index/`
   - Deliverables: working Pathway pipeline, verified vector search, clean schema.
 
-- Player 3 — Chunking + Retrieval
+- Sarvan — Chunking + Retrieval
   - `src/chunking_retrieval/`, `configs/retrieval.yaml`, `data/processed/`
   - Deliverables: chunking script, retrieval module, evidence grouping output.
 
-- Player 4 — LLM Reasoning + Validation
+- Gopal — LLM Reasoning + Validation
   - `src/reasoning_validation/`, `schemas/answer.schema.json`, `configs/models.yaml`
   - Deliverables: strict prompts, validation logic, clean JSON outputs.
 
