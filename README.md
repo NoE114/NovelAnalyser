@@ -144,22 +144,21 @@ NovelAnalyzer/
 
 ## Ownership and Deliverables
 
-- Raj — System Lead
+- [Raj Dey](https://github.com/NoE114) — System Lead
   - `configs/system_rules.yaml`, `src/orchestration/`, `docs/*`
   - Deliverables: rules, final explanation, system diagram, integration script.
 
-- Dipendu — Pathway + Data Pipeline
+- [Blezecon](https://github.com/blezecon) — Pathway + Data Pipeline
   - `src/pathway_pipeline/`, `configs/pathway.yaml`, `data/index/`
   - Deliverables: working Pathway pipeline, verified vector search, clean schema.
 
-- Sarvan — Chunking + Retrieval
+- [Sarvan](https://github.com/NoE114) — Chunking + Retrieval
   - `src/chunking_retrieval/`, `configs/retrieval.yaml`, `data/processed/`
   - Deliverables: chunking script, retrieval module, evidence grouping output.
 
-- Gopal — LLM Reasoning + Validation
+- [Gopal Paul](https://github.com/MAXxDEVIL) — LLM Reasoning + Validation
   - `src/reasoning_validation/`, `schemas/answer.schema.json`, `configs/models.yaml`
   - Deliverables: strict prompts, validation logic, clean JSON outputs.
-
 ## Workflow Enforcement (1 → 5)
 
 - Orchestrated by `src/orchestration/integrate.py`
