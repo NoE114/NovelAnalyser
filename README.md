@@ -144,19 +144,19 @@ NovelAnalyzer/
 
 ## Ownership and Deliverables
 
-- Player 1 — System Lead
+- Raj — System Lead
   - `configs/system_rules.yaml`, `src/orchestration/`, `docs/*`
   - Deliverables: rules, final explanation, system diagram, integration script.
 
-- Player 2 — Pathway + Data Pipeline
+- Dipendu — Pathway + Data Pipeline
   - `src/pathway_pipeline/`, `configs/pathway.yaml`, `data/index/`
   - Deliverables: working Pathway pipeline, verified vector search, clean schema.
 
-- Player 3 — Chunking + Retrieval
+- Sarvan — Chunking + Retrieval
   - `src/chunking_retrieval/`, `configs/retrieval.yaml`, `data/processed/`
   - Deliverables: chunking script, retrieval module, evidence grouping output.
 
-- Player 4 — LLM Reasoning + Validation
+- Gopal — LLM Reasoning + Validation
   - `src/reasoning_validation/`, `schemas/answer.schema.json`, `configs/models.yaml`
   - Deliverables: strict prompts, validation logic, clean JSON outputs.
 
