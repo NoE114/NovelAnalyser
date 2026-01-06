@@ -3,14 +3,14 @@
 This layout enforces orthogonal lanes that integrate cleanly. Each Player owns a directory with clear deliverables. The orchestrator ties them together under Player 1’s authority.
 
 ```text
-novel-retrieval-system/
+NovelAnalyzer/
 ├─ README.md
 │   # Raj — System Lead
 │   # Project rules, how to run, what is in/out of scope
 
 ├─ pyproject.toml
 ├─ requirements.txt
-├─ .env.example
+├─ .env
 ├─ .pre-commit-config.yaml
 ├─ Makefile
 │   # Raj — enforcement + reproducibility
