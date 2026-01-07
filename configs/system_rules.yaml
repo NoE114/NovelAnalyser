@@ -1,0 +1,87 @@
+# Player 1: Global system rules — single source of truth
+version: 1
+determinism:
+  seed: 42
+  lock_dependencies: true
+  hash_manifest: true
+
+data_contracts:
+  text_encoding: "utf-8"
+  metadata_required: ["chapter_id", "chapter_title", "paragraph_index", "source_path"]
+
+chunking:
+  target_words: 500
+  min_words: 400
+  max_words: 600
+  preserve_paragraphs: true
+  respect_chapter_boundaries: true
+  overlap_words: 0
+  spill_policy: "attach_previous"  # handle leftover short paragraphs
+  bad_break_fallback: "merge_adjacent"
+
+retrieval:
+  embedding_model_ref: "models:embedding.primary"
+  fallback_if_insufficient_evidence: "relax_diversity"
+  top_k: 8
+  diversity:
+    enforce_chapter_diversity: true
+    min_distinct_chapters: 3
+    per_chapter_limit: 2
+    strategy: "round_robin"  # or "penalize_duplicates"
+  ranking:
+    primary_metric: "cosine_similarity"
+    tie_breakers:
+      - "query_term_coverage"
+      - "chunk_length_proximity"
+      - "paragraph_order_proximity"
+  evidence_grouping:
+    max_groups: 3
+    group_by: "chapter_then_similarity"
+    min_items_per_group: 2
+
+reasoning:
+  output_schema_path: "schemas/answer.schema.json"
+  require_quotes_min: 3
+  quote_max_tokens: 120
+  require_alternative_explanations: true
+  require_confidence: true
+  temperature: 0.2
+  max_tokens: 1024
+  banned_behaviors:
+    - "speculation_without_quotes"
+    - "free_form_outputs"
+  allowed_operations:
+    - "quoting"
+    - "comparing_evidence"
+    - "weighing_alternatives"
+    - "confidence_estimation"
+
+validation:
+  min_evidence: 3
+  reject_if_confidence_below: 0.4
+  contradiction_detection: 
+    enabled: true
+    methods:
+      - "text_overlap_conflict"
+      - "semantic_negation_check"
+  quote_integrity:
+    must_match_source_substring: true
+    allow_fuzzy_match: false
+  schema_enforcement: "strict"
+
+logging:
+  format: "json"
+  level: "info"
+  include_manifest_hashes: true
+
+governance:
+  config_only_tuning: true
+  allowed_knobs:
+    - "retrieval.top_k"
+    - "retrieval.diversity.min_distinct_chapters"
+    - "reasoning.temperature"
+    - "validation.reject_if_confidence_below"
+  banned_changes:
+    - "chunking.target_words_outside_400_600"
+    - "free_form_reasoning_outputs"
+    - "model_switch_without_approval"
