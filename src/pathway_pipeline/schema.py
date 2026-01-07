@@ -1,75 +1,61 @@
+# Pathway table schemas
 import pathway as pw
-from dataclasses import dataclass
-from typing import Optional
 
-# ============= PATHWAY SCHEMAS =============
 
 class RawNovelSchema(pw.Schema):
-    """Schema for raw novel input"""
+    """Raw novel input"""
     story_id: str
-    filepath: str
     content: bytes
-    
 
-class NovelMetadataSchema(pw.Schema):
-    """Schema for novel-level metadata"""
+
+class NovelSchema(pw.Schema):
+    """Parsed novel"""
     story_id: str
-    title: str
-    total_chapters: int
-    total_paragraphs: int
+    text: str
     total_words: int
-    total_chars: int
-    processed_timestamp: str
+    total_chapters: int
 
 
-class NovelChunkSchema(pw.Schema):
+class ChunkSchema(pw.Schema):
     """
-    Schema for processed chunks
+    Chunk schema
     
-    Player 3 responsibility
+    Sarvan creates these, but you define the structure!
     """
-    chunk_id: str           # Format: "{story_id}_chunk_{idx}"
-    story_id: str           # Novel identifier
-    chapter: int            # Chapter number
-    para_idx: int           # Paragraph index within chapter
-    text: str               # Actual chunk content
-    word_count: int         # Words in this chunk
-    char_position: int      # Starting char position in novel
-    embedding: list         # Vector embedding (768-dim)
-
-
-# ============= PYTHON DATACLASSES (for internal use) =============
-
-@dataclass
-class ChunkMetadata:
-    """Metadata for a single chunk"""
     chunk_id: str
     story_id: str
     chapter: int
     para_idx: int
+    text: str
     word_count: int
     char_position: int
 
 
-@dataclass
-class NovelMetadata:
-    """Metadata for a complete novel"""
+class ChunkWithEmbeddingSchema(pw.Schema):
+    """Chunk with embedding"""
+    chunk_id: str
     story_id: str
-    title: str
-    total_chapters: int
-    total_paragraphs: int
-    total_words: int
-    total_chars: int
-    num_chunks: int
-    processed_timestamp: str
+    chapter: int
+    para_idx: int
+    text: str
+    word_count: int
+    char_position: int
+    embedding: list  # 768-dim vector
 
 
-@dataclass
-class IndexMetadata:
-    """Metadata for vector index"""
+class RetrievalResultSchema(pw.Schema):
+    """Retrieved evidence"""
+    chunk_id: str
     story_id: str
-    num_chunks: int
-    embedding_model: str
-    embedding_dim: int
-    index_version: str
-    created_at: str
+    text: str
+    similarity_score: float
+    chapter: int
+
+
+class ReasoningResultSchema(pw.Schema):
+    """LLM reasoning output"""
+    story_id: str
+    decision: int  # 0 or 1
+    reasoning: str
+    confidence: float
+    evidence_used: list
