@@ -1,0 +1,26 @@
+# Controls Pathway tables, connectors, index params
+
+pathway:
+  input_folder: "./data/raw/"
+  index_folder: "./data/index/"
+  mode: "static"  # batch processing
+  snapshot_enabled: true
+  snapshot_interval: 100  # Save state every 100 operations
+
+embeddings:
+  model: "all-mpnet-base-v2"
+  dimension: 768
+  batch_size: 32
+  normalize: true
+
+# Note: Chunking config is in retrieval.yaml (Sarvan)
+# Note: Reasoning config is in models.yaml (Gopal)
+
+reproducibility:
+  seed: 42
+  deterministic: true
+  version: "1.0"
+
+logging:
+  level: "INFO"
+  pathway_logs: "./logs/pathway.log"

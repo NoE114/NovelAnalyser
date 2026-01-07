@@ -21,7 +21,7 @@ NovelAnalyzer/
 │  │   # Chunking rules, retrieval rules, reasoning + validation constraints
 │  │
 │  ├─ pathway.yaml
-│  │   # Dipendu — Pathway configuration
+│  │   # Blezecon — Pathway configuration
 │  │   # Tables, connectors, index params, snapshot settings
 │  │
 │  ├─ retrieval.yaml
@@ -44,13 +44,13 @@ NovelAnalyzer/
 
 ├─ data/
 │  ├─ raw/
-│  │   # Dipendu — input novels + metadata (read-only)
+│  │   # Blezecon — input novels + metadata (read-only)
 │  │
 │  ├─ processed/
 │  │   # Sarvan — optional debug chunks (not authoritative)
 │  │
 │  ├─ index/
-│  │   # Dipendu — Pathway snapshot / restore state
+│  │   # Blezecon — Pathway snapshot / restore state
 │  │
 │  └─ samples/
 │      # Raj — small fixtures for demos/tests
@@ -72,17 +72,17 @@ NovelAnalyzer/
 │  │
 │  ├─ pathway_app/
 │  │  ├─ app.py
-│  │  │   # Dipendu — CORE Pathway program
+│  │  │   # Blezecon — CORE Pathway program
 │  │  │   # Wires ingestion → chunking → index → retrieval → reasoning
 │  │  │
 │  │  ├─ schema.py
-│  │  │   # Dipendu — Pathway table schemas
+│  │  │   # Blezecon — Pathway table schemas
 │  │  │
 │  │  ├─ chunking.py
 │  │  │   # Sarvan — chunking + boundary logic (400–600 words)
 │  │  │
 │  │  ├─ index.py
-│  │  │   # Dipendu — embeddings + vector index/search in Pathway
+│  │  │   # Blezecon — embeddings + vector index/search in Pathway
 │  │  │
 │  │  ├─ retrieval.py
 │  │  │   # Sarvan — ranking + diversity enforcement
@@ -95,7 +95,7 @@ NovelAnalyzer/
 │  │  │   # min evidence, contradictions, schema enforcement
 │  │  │
 │  │  ├─ service.py
-│  │  │   # Dipendu — optional HTTP ingress/egress
+│  │  │   # Blezecon — optional HTTP ingress/egress
 │  │  │
 │  │  ├─ prompts/
 │  │  │  ├─ base_prompt.md
@@ -112,14 +112,14 @@ NovelAnalyzer/
 │     │   # Raj — structured logs
 │     │
 │     ├─ io.py
-│     │   # Dipendu — safe reads/writes, hashing
+│     │   # Blezecon — safe reads/writes, hashing
 │     │
 │     └─ types.py
 │         # Raj — shared dataclasses / typing
 
 ├─ scripts/
 │  ├─ build_index.py
-│  │   # Dipendu — batch mode (delegates to Pathway app)
+│  │   # Blezecon — batch mode (delegates to Pathway app)
 │  │
 │  ├─ query.py
 │  │   # Gopal — run queries (batch or service)
@@ -129,7 +129,7 @@ NovelAnalyzer/
 
 └─ tests/
    ├─ test_pipeline.py
-   │   # Dipendu — ingestion + schema invariants
+   │   # Blezecon — ingestion + schema invariants
    │
    ├─ test_chunking.py
    │   # Sarvan — chunk size + boundary preservation
