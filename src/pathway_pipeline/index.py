@@ -16,9 +16,18 @@ class PathwayVectorIndex:
     """
     
     def __init__(self, config: dict):
-        self.model_name = config['model']
-        self.dimension = config['dimension']
-        self.batch_size = config['batch_size']
+        # Adapt to system_rules.yaml structure
+        # config here corresponds to the 'retrieval' section
+        
+        # Resolve reference or use default
+        ref = config.get('embedding_model_ref', 'models:embedding.primary')
+        if ref == "models:embedding.primary":
+            self.model_name = "sentence-transformers/all-MiniLM-L6-v2"
+        else:
+            self.model_name = ref
+            
+        self.dimension = config.get('dimension', 384) # Default for MiniLM
+        self.batch_size = config.get('batch_size', 32)
         
         print(f"🔧 Loading embedding model: {self.model_name}...")
         self.embedding_model = SentenceTransformer(self.model_name)

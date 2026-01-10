@@ -21,7 +21,7 @@ This is the **SPINE** of the entire system that wires together all components: i
            ▼
 ┌─────────────────────┐
 │  2. CHUNKING        │  Split into manageable chunks
-│  (Sarvan)           │
+│  (Raj)           │
 └──────────┬──────────┘
            │
            ▼
@@ -44,7 +44,7 @@ This is the **SPINE** of the entire system that wires together all components: i
            ▼                                      ▼
 ┌─────────────────────────────────────────────────────────┐
 │  5. RETRIEVAL        │  Find relevant evidence chunks    │
-│  (Sarvan)            │  (Uses vector similarity search)  │
+│  (Raj)            │  (Uses vector similarity search)  │
 └──────────┬──────────────────────────────────────────────┘
            │
            ▼
@@ -142,9 +142,9 @@ Defines Pathway table schemas that represent data at each pipeline stage.
 |--------|---------|-----------|---------|
 | `RawNovelSchema` | Raw novel input (bytes) | Ingestion | - |
 | `NovelSchema` | Parsed novel text | Chunking | - |
-| `ChunkSchema` | Individual text chunks | Chunking (Sarvan) | Embedding, Indexing |
+| `ChunkSchema` | Individual text chunks | Chunking (Raj) | Embedding, Indexing |
 | `ChunkWithEmbeddingSchema` | Chunks + 768-dim vectors | Embedding | Indexing, Retrieval |
-| `RetrievalResultSchema` | Retrieved evidence | Retrieval (Sarvan) | Reasoning (Gopal) |
+| `RetrievalResultSchema` | Retrieved evidence | Retrieval (Raj) | Reasoning (Gopal) |
 | `ReasoningResultSchema` | LLM output | Reasoning (Gopal) | API responses |
 
 ---
@@ -194,7 +194,7 @@ create_pathway_service(host="0.0.0.0", port=8080)
 The following modules are imported in `app.py` but not yet created:
 
 #### **chunking.py** - Text Chunking
-**Owner:** Sarvan
+**Owner:** Raj
 
 **Expected Function:**
 ```python
@@ -217,7 +217,7 @@ chunking:
 ---
 
 #### **retrieval.py** - Evidence Retrieval
-**Owner:** Sarvan
+**Owner:** Raj
 
 **Expected Function:**
 ```python
@@ -355,7 +355,7 @@ indexed_chunks = app.build_pipeline()
 #
 # This executes:
 # - Load novels from data/raw/
-# - Chunk into smaller pieces (Sarvan's code)
+# - Chunk into smaller pieces (Raj's code)
 # - Create embeddings for each chunk
 # - Build searchable index
 # - Save indexed data for queries
@@ -388,7 +388,7 @@ result = app.query(
 ```
 
 For each query:
-1. **Retrieval** (Sarvan): Find relevant chunks using vector search
+1. **Retrieval** (Raj): Find relevant chunks using vector search
 2. **Reasoning** (Gopal): Ask LLM if backstory is consistent with evidence
 3. **Validation** (Gopal): Verify reasoning quality
 4. Return decision to external system
@@ -400,7 +400,7 @@ For each query:
 | Team Member | Responsibility | Files |
 |-------------|-----------------|-------|
 | **Blezecon** | Pipeline orchestration, vector indexing | `app.py`, `index.py`, `service.py` |
-| **Sarvan** | Chunking, retrieval | `chunking.py` (create), `retrieval.py` (create) |
+| **Raj** | Chunking, retrieval | `chunking.py` (create), `retrieval.py` (create) |
 | **Gopal** | LLM reasoning, validation | `reasoner.py` (create), `validation.py` (create) |
 | **Raj** | External orchestration | (separate repo) |
 
@@ -428,7 +428,7 @@ python scripts/build_index.py
 This:
 1. Initializes the Pathway app
 2. Loads all novels from `data/raw/`
-3. Chunks them (Sarvan's logic)
+3. Chunks them (Raj's logic)
 4. Creates embeddings
 5. Builds the index
 6. Saves indexed data
@@ -489,7 +489,7 @@ Install via: `pip install pathway sentence-transformers fastapi pydantic uvicorn
 
 ## Notes for Team Members
 
-**For Sarvan (Chunking & Retrieval):**
+**For Raj (Chunking & Retrieval):**
 - Your `chunk_novels()` function receives a Pathway table and returns one with `ChunkSchema`
 - Your `retrieve_evidence()` function calls `PathwayVectorIndex.search()` and formats results
 - Both functions are called by `app.py`, you don't need to modify it

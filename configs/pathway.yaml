@@ -13,7 +13,7 @@ embeddings:
   batch_size: 32
   normalize: true
 
-# Note: Chunking config is in retrieval.yaml (Sarvan)
+# Note: Chunking config is in retrieval.yaml (Raj)
 # Note: Reasoning config is in models.yaml (Gopal)
 
 reproducibility:

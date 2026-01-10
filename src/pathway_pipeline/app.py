@@ -11,10 +11,11 @@ import yaml
 
 from .schema import RawNovelSchema, ChunkSchema, ReasoningResultSchema
 from .index import PathwayVectorIndex
-from .chunking import chunk_novels  # Sarvan writes this
-from .retrieval import retrieve_evidence  # Sarvan writes this
-from .reasoner import reason_with_llm  # Gopal writes this
-from .validation import validate_output  # Gopal writes this
+from .chunking import chunk_novels
+from .retrieval import retrieve_evidence
+from .reasoner import reason_with_llm
+from src.reasoning_validation.validation import Validator
+from src.reasoning_validation.schemas import ClassificationResult
 
 
 class NovelAnalyzerApp:
@@ -25,7 +26,7 @@ class NovelAnalyzerApp:
     All team members plug their logic into this app.
     """
     
-    def __init__(self, config_path: str = "configs/pathway.yaml"):
+    def __init__(self, config_path: str = "configs/system_rules.yaml"):
         """Initialize Pathway app with config"""
         print("🚀 Initializing Novel Analyzer Pathway App...")
         
@@ -35,8 +36,9 @@ class NovelAnalyzerApp:
         
         print(f"✅ Config loaded from {config_path}")
         
-        # Initialize components (your responsibility)
-        self.vector_index = PathwayVectorIndex(self.config['embeddings'])
+        # Initialize components
+        self.vector_index = PathwayVectorIndex(self.config['retrieval']) # Adjusted config key
+        self.validator = Validator(self.config)
         
         print("✅ Pathway app ready!")
     
@@ -48,10 +50,10 @@ class NovelAnalyzerApp:
         
         Flow:
         1. Ingest novels (YOU)
-        2. Chunk novels (Sarvan's logic, but YOU call it)
+        2. Chunk novels (Raj's logic, but YOU call it)
         3. Create embeddings (YOU)
         4. Build vector index (YOU)
-        5. Retrieve evidence (Sarvan's logic, but YOU call it)
+        5. Retrieve evidence (Raj's logic, but YOU call it)
         6. Reason with LLM (Gopal's logic, but YOU call it)
         7. Validate output (Gopal's logic, but YOU call it)
         """
@@ -64,13 +66,13 @@ class NovelAnalyzerApp:
         novels = self.ingest_novels()
         print(f"  ✅ Ingested novels via Pathway")
         
-        # ========== STEP 2: CHUNKING (SARVAN'S LOGIC) ==========
+        # ========== STEP 2: CHUNKING (Raj'S LOGIC) ==========
         print("\n✂️ Step 2: Chunking novels...")
         chunks = chunk_novels(
             novels, 
             chunk_size=self.config['chunking']['chunk_size']
         )
-        print(f"  ✅ Chunks created (Sarvan's logic)")
+        print(f"  ✅ Chunks created (Raj's logic)")
         
         # ========== STEP 3: EMBEDDINGS (YOUR CODE) ==========
         print("\n🔢 Step 3: Creating embeddings...")
@@ -93,14 +95,59 @@ class NovelAnalyzerApp:
     
     def ingest_novels(self) -> pw.Table:
         """
-        Ingest novels using Pathway
+        Ingest novels using Pathway (Stub for Windows)
         YOUR RESPONSIBILITY
         
         Returns:
-            Pathway table with novels
+            Pathway table (or Mock) with novels
         """
         input_path = self.config['pathway']['input_folder']
         
+        # Check if Pathway is real or stub
+        is_windows_mode = False
+        try:
+            _ = pw.io.fs.read
+        except AttributeError:
+            is_windows_mode = True
+            
+        if is_windows_mode:
+            print("⚠️  WINDOWS MODE DETECTED: Bypassing Pathway Engine...")
+            # Manual Ingestion Logic
+            import glob
+            import os
+            from src.pathway_pipeline.udfs import parse_file_content
+            
+            data_rows = []
+            files = glob.glob(os.path.join(input_path, "*"))
+            print(f"  📂 Found {len(files)} files in {input_path}")
+            
+            for file_path in files:
+                fname = os.path.basename(file_path)
+                if not (fname.endswith('.txt') or fname.endswith('.csv')): 
+                    continue
+                    
+                story_id = self._extract_story_id(file_path)
+                try:
+                    with open(file_path, 'rb') as f:
+                        raw_bytes = f.read()
+                    content_str = parse_file_content(raw_bytes, file_path)
+                    data_rows.append({"story_id": story_id, "content": content_str})
+                    print(f"    - Ingested: {fname}")
+                except Exception as e:
+                    print(f"    - Error reading {fname}: {e}")
+            
+            # Create a Mock Table that behaves like Pathway Table for select/apply
+            class MockTable:
+                def __init__(self, data): self.data = data
+                def select(self, **kwargs): return self # Simplification
+                def __iter__(self): return iter(self.data) # Make iterable
+                
+            return MockTable(data_rows)
+
+        # Standard Pathway Logic (Linux/Docker)
+        # Import UDF from global module (pickling safe)
+        from src.pathway_pipeline.udfs import parse_file_content
+
         # Use Pathway's file connector
         novels = pw.io.fs.read(
             path=input_path,
@@ -109,19 +156,23 @@ class NovelAnalyzerApp:
             with_metadata=True
         )
         
-        # Transform to your schema
+        # Transform to your schema with Multi-format parsing
         novels = novels.select(
             story_id=pw.this.path.apply(self._extract_story_id),
-            content=pw.this.data
+            content=pw.apply(parse_file_content, pw.this.data, pw.this.path)
         )
         
         return novels
     
     def _extract_story_id(self, filepath: str) -> str:
-        """Extract story ID from filepath"""
+        """Extract story ID from filepath handling multiple extensions"""
         import os
         filename = os.path.basename(filepath)
-        return filename.replace('novel_', '').replace('.txt', '')
+        # Remove common extensions
+        clean_name = filename.replace('novel_', '')
+        for ext in ['.txt', '.pdf', '.csv']:
+            clean_name = clean_name.replace(ext, '')
+        return clean_name
     
     def query(self, story_id: str, backstory: str) -> dict:
         """
@@ -138,7 +189,7 @@ class NovelAnalyzerApp:
         """
         print(f"\n🔍 Processing query for story {story_id}...")
         
-        # ========== STEP 5: RETRIEVAL (SARVAN'S LOGIC) ==========
+        # ========== STEP 5: RETRIEVAL (Raj'S LOGIC) ==========
         print("  📖 Retrieving evidence...")
         evidence_chunks = retrieve_evidence(
             query=backstory,
@@ -159,13 +210,13 @@ class NovelAnalyzerApp:
         
         # ========== STEP 7: VALIDATION (GOPAL'S LOGIC) ==========
         print("  ✔️ Validating output...")
-        validated_result = validate_output(
+        validated_result = self.validator.validate_classification(
             reasoning_result,
-            min_evidence=self.config['validation']['min_evidence']
+            retrieved_context=evidence_chunks
         )
-        print(f"  ✅ Validation complete")
+        print(f"  ✅ Validation complete. Status: {validated_result.status}")
         
-        return validated_result
+        return validated_result.model_dump()
     
     def run_service(self, host: str = "0.0.0.0", port: int = 8080):
         """

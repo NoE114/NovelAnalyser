@@ -17,7 +17,7 @@ def main():
     print("="*60)
     
     # Run Blezecon's Pathway app
-    app = run_app(config_path="configs/pathway.yaml")
+    app = run_app(config_path="configs/system_rules.yaml")
     
     print("\n✅ Index build complete!")
     print("📁 Outputs in data/index/")

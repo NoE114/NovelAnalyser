@@ -20,7 +20,7 @@ class ChunkSchema(pw.Schema):
     """
     Chunk schema
     
-    Sarvan creates these, but you define the structure!
+    Raj creates these, but you define the structure!
     """
     chunk_id: str
     story_id: str
