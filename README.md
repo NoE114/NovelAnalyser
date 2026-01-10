@@ -1,176 +1,100 @@
-# Repository File Structure aligned to the 4-Player plan
+# Systems Reasoning with NLP: Narrative Classification & Analysis
 
-This layout enforces orthogonal lanes that integrate cleanly. Each Player owns a directory with clear deliverables. The orchestrator ties them together under Player 1’s authority.
+> **Track A: Systems Reasoning with NLP & Generative AI**
+> *Built with Pathway, Groq, and Deterministic Logic*
 
-```text
-NovelAnalyzer/
-├─ README.md
-│   # Raj — System Lead
-│   # Project rules, how to run, what is in/out of scope
+## 📖 Project Overview
+This repository hosts a **Logic-First Narrative Analysis System** designed to classify long-context literary works (**TXT or CSV**) based on character motivation and causal attribution.
 
-├─ pyproject.toml
-├─ requirements.txt
-├─ .env
-├─ .pre-commit-config.yaml
-├─ Makefile
-│   # Raj — enforcement + reproducibility
+Unlike standard RAG pipelines that "guess" answers, this system prioritizes **correctness, evidence, and rejection**. It includes a **Windows Native Compatibility Layer** that bypasses the need for Linux/Docker, running purely on Python/Pandas while mimicking the Pathway dataflow.
 
-├─ configs/
-│  ├─ system_rules.yaml
-│  │   # Raj — GLOBAL AUTHORITY
-│  │   # Chunking rules, retrieval rules, reasoning + validation constraints
-│  │
-│  ├─ pathway.yaml
-│  │   # Blezecon — Pathway configuration
-│  │   # Tables, connectors, index params, snapshot settings
-│  │
-│  ├─ retrieval.yaml
-│  │   # Sarvan — retrieval knobs
-│  │   # top-k, diversity rules, fallback behavior
-│  │
-│  └─ models.yaml
-│      # Gopal — model usage rules
-│      # embedding model, LLM provider, temps, rate limits
+### 🎯 Key Objectives
+1.  **Evidence-Grounded Reasoning**: No hallucination. Every claim must be backed by verbatim quotes from the text.
+2.  **Long-Context Management**: Handling full novels via boundary-aware chunking and diversity-enforced retrieval.
+3.  **Strict Governance**: Automated validation layers that reject low-confidence or contradictory outputs.
 
-├─ docs/
-│  ├─ system_overview.md
-│  │   # Raj — technical explanation for judges
-│  │
-│  ├─ judges_explanation.md
-│  │   # Raj — narrative explanation (non-technical)
-│  │
-│  └─ system_diagram.png
-│      # Raj — visual pipeline (Pathway → retrieval → reasoning)
+---
 
-├─ data/
-│  ├─ raw/
-│  │   # Blezecon — input novels + metadata (read-only)
-│  │
-│  ├─ processed/
-│  │   # Sarvan — optional debug chunks (not authoritative)
-│  │
-│  ├─ index/
-│  │   # Blezecon — Pathway snapshot / restore state
-│  │
-│  └─ samples/
-│      # Raj — small fixtures for demos/tests
+## 🏗️ System Architecture
 
-├─ schemas/
-│  └─ answer.schema.json
-│      # Raj — STRICT output contract
-│      # Classification, quotes, alternatives, confidence
+The system follows a strict **Governance-First Architecture**:
 
-├─ src/
-│  ├─ orchestration/
-│  │  ├─ integrate.py
-│  │  │   # Raj — single entrypoint
-│  │  │   # Starts Pathway app, enforces execution order
-│  │  │
-│  │  └─ policies.py
-│  │      # Raj — reads system_rules.yaml
-│  │      # Guards what LLM + pipeline are allowed to do
-│  │
-│  ├─ pathway_app/
-│  │  ├─ app.py
-│  │  │   # Blezecon — CORE Pathway program
-│  │  │   # Wires ingestion → chunking → index → retrieval → reasoning
-│  │  │
-│  │  ├─ schema.py
-│  │  │   # Blezecon — Pathway table schemas
-│  │  │
-│  │  ├─ chunking.py
-│  │  │   # Sarvan — chunking + boundary logic (400–600 words)
-│  │  │
-│  │  ├─ index.py
-│  │  │   # Blezecon — embeddings + vector index/search in Pathway
-│  │  │
-│  │  ├─ retrieval.py
-│  │  │   # Sarvan — ranking + diversity enforcement
-│  │  │
-│  │  ├─ reasoner.py
-│  │  │   # Gopal — LLM calls (schema-bound, no free-form)
-│  │  │
-│  │  ├─ validation.py
-│  │  │   # Gopal — Python veto logic
-│  │  │   # min evidence, contradictions, schema enforcement
-│  │  │
-│  │  ├─ service.py
-│  │  │   # Blezecon — optional HTTP ingress/egress
-│  │  │
-│  │  ├─ prompts/
-│  │  │  ├─ base_prompt.md
-│  │  │  │   # Gopal — primary reasoning prompt
-│  │  │  │
-│  │  │  └─ verification_prompt.md
-│  │  │      # Gopal — optional cross-check prompt
-│  │  │
-│  │  └─ README.md
-│  │      # Raj — explains Pathway dataflow in plain language
-│  │
-│  └─ utils/
-│     ├─ logging.py
-│     │   # Raj — structured logs
-│     │
-│     ├─ io.py
-│     │   # Blezecon — safe reads/writes, hashing
-│     │
-│     └─ types.py
-│         # Raj — shared dataclasses / typing
-
-├─ scripts/
-│  ├─ build_index.py
-│  │   # Blezecon — batch mode (delegates to Pathway app)
-│  │
-│  ├─ query.py
-│  │   # Gopal — run queries (batch or service)
-│  │
-│  └─ evaluate.py
-│      # Raj — lightweight sanity evaluation
-
-└─ tests/
-   ├─ test_pipeline.py
-   │   # Blezecon — ingestion + schema invariants
-   │
-   ├─ test_chunking.py
-   │   # Sarvan — chunk size + boundary preservation
-   │
-   ├─ test_retrieval.py
-   │   # Sarvan — diversity + ranking stability
-   │
-   └─ test_validation.py
-       # Gopal — rejects weak or invalid outputs
-
+```mermaid
+graph TD
+    A[Raw Novels (TXT/CSV)] -->|Ingestion Shim| B(Boundary-Aware Chunking)
+    B -->|Embeddings| C{Vector Index}
+    D[User Query] -->|Deterministic Retrieval| C
+    C -->|Evidence Groups| E[Reasoning Engine]
+    E -->|Hypothesis Comparison| F(LLM - Groq)
+    F -->|JSON Output| G{Validation Layer}
+    G -- Pass --> H[Final Classification]
+    G -- Fail --> I[Rejection / Feedback]
+    
+    subgraph "Owned by Dipendu"
+    A
+    B
+    C
+    D
+    end
+    
+    subgraph "Owned by Gopal"
+    E
+    F
+    G
+    end
+    
+    subgraph "Owned by Raj"
+    H
+    I
+    end
 ```
 
-## Ownership and Deliverables
+### Core Components
+1.  **Data Pipeline** (`src/pathway_pipeline/`):
+    - **Universal Ingestion**: Automatically detects `.txt` and `.csv`.
+    - **Windows Compatibility**: Uses a native Python shim if Pathway is not installed (Windows).
+    - **Likely Function**: `app.ingest_novels` manages the flow.
 
-- [Raj Dey](https://github.com/NoE114) — System Lead
-  - `configs/system_rules.yaml`, `src/orchestration/`, `docs/*`
-  - Deliverables: rules, final explanation, system diagram, integration script.
+2.  **Reasoning & Validation** (`src/reasoning_validation/`):
+    - **Validator**: Python logic that vetoes LLM outputs if confidence < 0.4 or evidence is insufficient.
 
-- [Blezecon](https://github.com/blezecon) — Pathway + Data Pipeline
-  - `src/pathway_pipeline/`, `configs/pathway.yaml`, `data/index/`
-  - Deliverables: working Pathway pipeline, verified vector search, clean schema.
+---
 
-- [Sarvan](https://github.com/NoE114) — Chunking + Retrieval
-  - `src/chunking_retrieval/`, `configs/retrieval.yaml`, `data/processed/`
-  - Deliverables: chunking script, retrieval module, evidence grouping output.
+## 👥 Team & Responsibilities
 
-- [Gopal Paul](https://github.com/MAXxDEVIL) — LLM Reasoning + Validation
-  - `src/reasoning_validation/`, `schemas/answer.schema.json`, `configs/models.yaml`
-  - Deliverables: strict prompts, validation logic, clean JSON outputs.
-## Workflow Enforcement (1 → 5)
+| Player | Role | Responsibility | Key Files |
+| :--- | :--- | :--- | :--- |
+| **Raj Dey** | **System Lead** | Global Architecture, Governance Rules | `configs/system_rules.yaml`, `src/pathway_pipeline/app.py` |
+| **Dipendu** | **Pathway Engineer** | Data Ingestion (TXT/CSV), Vector Indexing | `src/pathway_pipeline/udfs.py`, `src/pathway_pipeline/retrieval.py` |
+| **Gopal Paul** | **Reasoning Logic** | Constraint Prompts, Schema Validation | `src/pathway_pipeline/reasoner.py`, `src/reasoning_validation/` |
 
-- Orchestrated by `src/orchestration/integrate.py`
-  1. Load rules (`system_rules.yaml`)
-  2. Build data spine (`pathway_pipeline/*`)
-  3. Chunk + retrieve (`chunking_retrieval/*`)
-  4. Reason + validate (`reasoning_validation/*`)
-  5. Freeze artifacts and produce judge-facing docs (`docs/*`)
+---
 
-## Determinism and Compliance
+## 🚀 How to Run (Windows Native)
 
-- Configuration-only tuning (no code edits without Player 1 approval).
-- Fixed seeds and content hashing in `determinism.py` and `utils/io.py`.
-- Pinned dependencies and CI tests aligned to failure conditions.
-- No agents, UI, or end-to-end model roulette—only controlled execution paths via scripts.
+### 1. Prerequisites
+```bash
+pip install pathway pydantic groq sentence-transformers pyyaml pandas
+export GROQ_API_KEY="your_api_key_here"
+```
+
+### 2. Build the Index (Ingest Novels)
+Place your files (**.txt** or **.csv**) in `data/raw/` and run:
+```bash
+python scripts/build_index.py
+```
+*(Note: on Windows, this will print a "Windows Mode" warning. This is normal.)*
+
+### 3. Generate Predictions (Binary Output)
+Process the `data/raw/test.csv` file to verify claims against the indexed novels.
+```bash
+python scripts/generate_predictions.py
+```
+*   **Input**: `data/raw/test.csv` (Claims to verify)
+*   **Output**: `output.csv` (Columns: `id`, `prediction` [0 or 1])
+
+### 4. Verify Logic (Governance Tests)
+Run the isolated logic tests to prove rejection capabilities.
+```bash
+python tests/verify_logic.py
+```
