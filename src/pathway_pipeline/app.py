@@ -6,8 +6,27 @@ This is the SPINE of the entire system.
 Wires: ingestion → chunking → index → retrieval → reasoning
 """
 import pathway as pw
+
+# WINDOWS COMPATIBILITY PATCH
+# The 'pathway' package on Windows is a stub. We must patch it to prevent ImportErrors.
+try:
+    _ = pw.Table
+except AttributeError:
+    print("⚠️  WINDOWS MODE DETECTED: Patching Pathway with Mocks...")
+    try:
+        from src.pathway_pipeline.windows_mocks import MockTable, MockUDF, MockExpression, mock_apply, MockSchema
+        pw.Table = MockTable
+        pw.UDF = MockUDF
+        pw.this = MockExpression()
+        pw.apply = mock_apply
+        pw.Schema = MockSchema
+    except ImportError:
+        print("❌ Could not import windows_mocks. Ensure src/pathway_pipeline/windows_mocks.py exists.")
+
 from typing import Optional
 import yaml
+from src.utils.env_loader import load_env
+load_env()
 
 from .schema import RawNovelSchema, ChunkSchema, ReasoningResultSchema
 from .index import PathwayVectorIndex
@@ -70,7 +89,7 @@ class NovelAnalyzerApp:
         print("\n✂️ Step 2: Chunking novels...")
         chunks = chunk_novels(
             novels, 
-            chunk_size=self.config['chunking']['chunk_size']
+            chunk_size=self.config['chunking']['target_words']
         )
         print(f"  ✅ Chunks created (Raj's logic)")
         
@@ -136,12 +155,8 @@ class NovelAnalyzerApp:
                 except Exception as e:
                     print(f"    - Error reading {fname}: {e}")
             
-            # Create a Mock Table that behaves like Pathway Table for select/apply
-            class MockTable:
-                def __init__(self, data): self.data = data
-                def select(self, **kwargs): return self # Simplification
-                def __iter__(self): return iter(self.data) # Make iterable
-                
+            # Use shared MockTable that supports flatten/select
+            from src.pathway_pipeline.windows_mocks import MockTable    
             return MockTable(data_rows)
 
         # Standard Pathway Logic (Linux/Docker)
@@ -250,7 +265,7 @@ class NovelAnalyzerApp:
 
 # ========== MAIN ENTRYPOINT ==========
 
-def run_app(config_path: str = "configs/pathway.yaml"):
+def run_app(config_path: str = "configs/system_rules.yaml"):
     """
     Run the Pathway application
     
@@ -263,6 +278,12 @@ def run_app(config_path: str = "configs/pathway.yaml"):
 
 
 if __name__ == "__main__":
-    # For testing
-    app = run_app()
-    print("\n✅ Pathway app running!")
+    try:
+        # For testing
+        app = run_app()
+        print("\n✅ Pathway app running!")
+    except Exception:
+        import traceback
+        traceback.print_exc()
+        import sys
+        sys.exit(1)

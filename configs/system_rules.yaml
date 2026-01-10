@@ -85,3 +85,10 @@ governance:
     - "chunking.target_words_outside_400_600"
     - "free_form_reasoning_outputs"
     - "model_switch_without_approval"
+
+pathway:
+  input_folder: "./data/raw/"
+  index_folder: "./data/index/"
+  mode: "static"
+  snapshot_enabled: true
+  snapshot_interval: 100
