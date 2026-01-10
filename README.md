@@ -23,7 +23,7 @@ The system follows a strict **Governance-First Architecture**:
 graph TD
     A[Raw Novels (TXT/CSV)] -->|Ingestion Shim| B(Boundary-Aware Chunking)
     B -->|Embeddings| C{Vector Index}
-    D[User Query] -->|Deterministic Retrieval| C
+    D[User Query] -->|Deterministic Retrieval| C    
     C -->|Evidence Groups| E[Reasoning Engine]
     E -->|Hypothesis Comparison| F(LLM - Groq)
     F -->|JSON Output| G{Validation Layer}
